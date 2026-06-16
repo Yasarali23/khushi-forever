@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Yasar ❤ Khushi — Forever Together</title>
+
+<!-- Fonts: Display (romantic serif) + Body (elegant serif) + Script (handwritten) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,500;1,600&family=Tangerine:wght@400;700&family=Cormorant:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<!-- Three.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<style>
+/* ============================= ROOT TOKENS ============================= */
+:root{
+  --deep-red: #8B0000;
+  --deep-red-2: #5e0000;
+  --rose-gold: #B76E79;
+  --rose-gold-light: #E8B4B8;
+  --champagne: #F7E7CE;
+  --champagne-gold: #D4AF37;
+  --pearl: #F8F6F2;
+  --midnight: #0a0306;
+  --midnight-2: #150508;
+  --ink: #1a0a0d;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth; background:var(--midnight);}
+body{
+  margin:0;
+  background:var(--midnight);
+  color:var(--pearl);
+  font-family:'Cormorant Garamond', serif;
+  overflow-x:hidden;
+  cursor:default;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--deep-red); color:var(--champagne);}
+::-webkit-scrollbar{width:10px;}
+::-webkit-scrollbar-track{background:var(--midnight);}
+::-webkit-scrollbar-thumb{background:linear-gradient(var(--champagne-gold), var(--deep-red)); border-radius:10px;}
+
+h1,h2,h3,h4,.font-display{font-family:'Playfair Display', serif;}
+.font-script{font-family:'Tangerine', cursive;}
+
+.gold-text{
+  background:linear-gradient(135deg,#F7E7CE 0%,#D4AF37 30%,#F7E7CE 50%,#B8860B 70%,#F7E7CE 100%);
+  background-size:300% 300%;
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:shimmer 6s ease-in-out infinite;
+}
+@keyframes shimmer{
+  0%,100%{background-position:0% 50%;}
+  50%{background-position:100% 50%;}
+}
+.rose-text{
+  background:linear-gradient(135deg,#8B0000,#B76E79,#8B0000);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+}
+
+/* ============================= UTILITIES ============================= */
+.section{position:relative; min-height:100vh; width:100%; display:flex; align-items:center; justify-content:center; padding:6rem 1.5rem; overflow:hidden;}
+.glass{
+  background:rgba(20,8,10,0.45);
+  border:1px solid rgba(212,175,55,0.25);
+  -webkit-backdrop-filter:blur(18px);
+  backdrop-filter:blur(18px);
+  box-shadow:0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.divider-orn{
+  width:100px; height:1px;
+  background:linear-gradient(90deg, transparent, var(--champagne-gold), transparent);
+  margin:1.5rem auto;
+  position:relative;
+}
+.divider-orn::before{
+  content:'❦'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  color:var(--champagne-gold); background:var(--midnight); padding:0 12px; font-size:1.1rem;
+}
+.eyebrow{
+  letter-spacing:0.35em; text-transform:uppercase; font-size:0.7rem; color:var(--champagne-gold);
+  font-family:'Cormorant', serif; font-weight:500;
+}
+
+/* ============================= CANVAS LAYERS ============================= */
+#petals-canvas, #stars-canvas, #sparkle-canvas{
+  position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:40;
+}
+#stars-canvas{z-index:1;}
+#sparkle-canvas{z-index:45;}
+.bg-layer{position:absolute; inset:0; z-index:0;}
+
+/* moonlight glow */
+.moonlight{
+  position:absolute; top:-10%; right:5%; width:500px; height:500px; border-radius:50%;
+  background:radial-gradient(circle, rgba(248,246,242,0.18) 0%, rgba(212,175,55,0.08) 40%, transparent 70%);
+  filter:blur(20px); pointer-events:none;
+}
+.light-rays{
+  position:absolute; inset:0; pointer-events:none; opacity:0.5; mix-blend-mode:screen;
+  background:conic-gradient(from 200deg at 50% -10%, transparent 0deg, rgba(212,175,55,0.08) 5deg, transparent 12deg, transparent 40deg, rgba(212,175,55,0.06) 47deg, transparent 55deg, transparent 100deg, rgba(212,175,55,0.05) 108deg, transparent 116deg, transparent 360deg);
+  animation:rayspin 60s linear infinite;
+}
+@keyframes rayspin{from{transform:rotate(0deg);} to{transform:rotate(360deg);}}
+
+.smoke{
+  position:absolute; bottom:-20%; width:140%; left:-20%; height:60%;
+  background:radial-gradient(ellipse at 30% 100%, rgba(139,0,0,0.25), transparent 60%),
+              radial-gradient(ellipse at 70% 100%, rgba(183,110,121,0.2), transparent 60%);
+  filter:blur(40px); pointer-events:none; animation:smokedrift 18s ease-in-out infinite alternate;
+}
+@keyframes smokedrift{from{transform:translateX(-2%) translateY(0);} to{transform:translateX(2%) translateY(-2%);}}
+
+/* heartbeat pulse */
+.heartbeat{ animation:heartbeat 1.6s ease-in-out infinite; }
+@keyframes heartbeat{
+  0%,100%{transform:scale(1);}
+  14%{transform:scale(1.12);}
+  28%{transform:scale(1);}
+  42%{transform:scale(1.18);}
+  70%{transform:scale(1);}
+}
+.pulse-glow{ animation:pulseGlow 2.2s ease-in-out infinite; }
+@keyframes pulseGlow{
+  0%,100%{filter:drop-shadow(0 0 10px rgba(139,0,0,0.6));}
+  50%{filter:drop-shadow(0 0 35px rgba(212,175,55,0.8));}
+}
+
+/* ============================= LOADING SCREEN ============================= */
+#loader{
+  position:fixed; inset:0; background:var(--midnight); z-index:9999;
+  display:flex; align-items:center; justify-content:center; flex-direction:column;
+  transition:opacity 1.4s ease, visibility 1.4s ease;
+}
+#loader.hide{opacity:0; visibility:hidden; pointer-events:none;}
+.loader-rose{ width:90px; height:90px; position:relative; }
+.loader-text{ margin-top:2rem; letter-spacing:0.25em; font-size:0.8rem; color:var(--champagne-gold); text-transform:uppercase; font-family:'Cormorant', serif; }
+.loader-bar-track{ width:220px; height:1px; background:rgba(212,175,55,0.25); margin-top:1.2rem; position:relative; overflow:hidden; }
+.loader-bar-fill{ position:absolute; left:0; top:0; height:100%; width:0%; background:linear-gradient(90deg,var(--deep-red),var(--champagne-gold)); }
+
+/* ============================= OPENING SCENE ============================= */
+#opening{
+  position:relative; min-height:100vh; background:radial-gradient(ellipse at center, #150508 0%, #000000 80%);
+  display:flex; align-items:center; justify-content:center; flex-direction:column; text-align:center; overflow:hidden;
+}
+.opening-rose-wrap{ position:relative; width:160px; height:160px; }
+.opening-line{ opacity:0; font-family:'Playfair Display', serif; font-style:italic; font-weight:400; }
+
+/* ============================= NAV ============================= */
+#nav{
+  position:fixed; top:0; left:0; width:100%; z-index:50; padding:1.1rem 2rem;
+  display:flex; align-items:center; justify-content:space-between;
+  transition:background 0.4s ease, padding 0.4s ease, border-color .4s ease;
+  border-bottom:1px solid transparent;
+}
+#nav.scrolled{ background:rgba(10,3,6,0.75); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); border-bottom:1px solid rgba(212,175,55,0.15); padding:0.7rem 2rem;}
+#music-toggle{
+  width:46px; height:46px; border-radius:50%; border:1px solid rgba(212,175,55,0.4);
+  display:flex; align-items:center; justify-content:center; cursor:pointer; background:rgba(20,8,10,0.5);
+  transition:all .3s ease;
+}
+#music-toggle:hover{ border-color:var(--champagne-gold); box-shadow:0 0 18px rgba(212,175,55,0.4); }
+
+/* ============================= BUTTONS ============================= */
+.btn-luxury{
+  position:relative; display:inline-flex; align-items:center; gap:0.6rem;
+  padding:1rem 2.6rem; font-family:'Cormorant', serif; letter-spacing:0.18em; text-transform:uppercase; font-size:0.85rem;
+  color:var(--champagne); border:1px solid var(--champagne-gold); background:transparent; cursor:pointer;
+  overflow:hidden; transition:color .4s ease, box-shadow .4s ease; isolation:isolate;
+}
+.btn-luxury::before{
+  content:''; position:absolute; inset:0; background:linear-gradient(135deg,var(--deep-red),var(--champagne-gold)); transform:scaleX(0); transform-origin:left; transition:transform .5s ease; z-index:-1;
+}
+.btn-luxury:hover::before{ transform:scaleX(1); }
+.btn-luxury:hover{ color:#fff; box-shadow:0 0 30px rgba(212,175,55,0.5); }
+
+/* ============================= TIMELINE ============================= */
+.timeline-line{
+  position:absolute; left:50%; top:0; bottom:0; width:2px;
+  background:linear-gradient(to bottom, transparent, var(--champagne-gold) 10%, var(--deep-red) 50%, var(--champagne-gold) 90%, transparent);
+  transform:translateX(-50%);
+}
+.timeline-card{
+  opacity:0; transform:translateY(60px);
+}
+.timeline-dot{
+  width:18px; height:18px; border-radius:50%; background:radial-gradient(circle, var(--champagne-gold), var(--deep-red));
+  box-shadow:0 0 0 4px rgba(10,3,6,1), 0 0 20px rgba(212,175,55,0.7);
+}
+
+/* ============================= ENVELOPE ============================= */
+.envelope-scene{ position:relative; width:340px; height:230px; perspective:1500px; cursor:pointer; }
+.envelope-back{
+  position:absolute; inset:0; background:linear-gradient(135deg,#2a0a0a,#150508);
+  border:1px solid var(--champagne-gold); box-shadow:0 20px 60px rgba(0,0,0,0.6);
+}
+.envelope-letter{
+  position:absolute; left:6%; right:6%; top:8%; width:88%; height:84%;
+  background:linear-gradient(180deg,#fdf8ee,#f3e9d2);
+  box-shadow:0 10px 40px rgba(0,0,0,0.5); border-radius:2px;
+  transform:translateY(0%); transition:transform 1.4s cubic-bezier(.16,1,.3,1);
+  display:flex; align-items:center; justify-content:center; padding:1.2rem; z-index:5;
+}
+.envelope-flap{
+  position:absolute; top:0; left:0; right:0; height:55%;
+  background:linear-gradient(135deg,#7a0000,#3d0000);
+  clip-path:polygon(0 0, 100% 0, 50% 100%);
+  transform-origin:top center; transition:transform 1.1s cubic-bezier(.7,-0.4,.3,1.4); z-index:10;
+  border-bottom:1px solid rgba(212,175,55,0.4);
+}
+.envelope-front-l{ position:absolute; bottom:0; left:0; width:50%; height:62%; background:linear-gradient(225deg,#7a0000,#3d0000); clip-path:polygon(0 100%, 0 0, 100% 100%); z-index:7;}
+.envelope-front-r{ position:absolute; bottom:0; right:0; width:50%; height:62%; background:linear-gradient(135deg,#7a0000,#3d0000); clip-path:polygon(100% 100%, 100% 0, 0 100%); z-index:7;}
+.envelope-seal{
+  position:absolute; top:46%; left:50%; width:54px; height:54px; transform:translate(-50%,-50%); z-index:20;
+  border-radius:50%; background:radial-gradient(circle, var(--champagne-gold), #8B6914);
+  display:flex; align-items:center; justify-content:center; box-shadow:0 4px 14px rgba(0,0,0,0.5);
+  font-family:'Playfair Display',serif; font-weight:700; color:#3d0000; font-size:1.3rem; transition:opacity .4s ease, transform .6s ease;
+}
+.envelope-scene.opened .envelope-flap{ transform:rotateX(180deg); }
+.envelope-scene.opened .envelope-seal{ opacity:0; transform:translate(-50%,-50%) scale(0); }
+.envelope-scene.opened .envelope-letter{ transform:translateY(-130%) scale(1.05); }
+.letter-paper-text{ font-family:'Cormorant', serif; color:#3a1212; font-style:italic; line-height:1.7; font-size:0.95rem; text-align:left;}
+
+/* ============================= 100 REASONS FLIP CARDS ============================= */
+.flip-card{ perspective:1000px; height:160px; }
+.flip-inner{
+  position:relative; width:100%; height:100%; transition:transform .7s cubic-bezier(.4,.2,.2,1); transform-style:preserve-3d;
+}
+.flip-card:hover .flip-inner, .flip-card.flipped .flip-inner{ transform:rotateY(180deg); }
+.flip-face{
+  position:absolute; inset:0; -webkit-backface-visibility:hidden; backface-visibility:hidden;
+  border:1px solid rgba(212,175,55,0.4); border-radius:6px; display:flex; align-items:center; justify-content:center;
+  padding:0.9rem; text-align:center;
+}
+.flip-front{ background:linear-gradient(160deg, rgba(139,0,0,0.25), rgba(10,3,6,0.6)); }
+.flip-back{ background:linear-gradient(160deg, rgba(212,175,55,0.18), rgba(10,3,6,0.85)); transform:rotateY(180deg); }
+
+/* ============================= GALLERY ============================= */
+.frame{
+  position:relative; padding:14px; background:linear-gradient(145deg,#caa247,#7a5a1e,#caa247);
+  box-shadow:0 15px 40px rgba(0,0,0,0.55);
+  transition:transform .5s cubic-bezier(.16,1,.3,1), box-shadow .5s ease;
+}
+.frame:hover{ transform:translateY(-10px) scale(1.03); box-shadow:0 25px 60px rgba(212,175,55,0.35); }
+.frame-inner{ position:relative; overflow:hidden; border:1px solid rgba(0,0,0,0.4); }
+.frame-inner img{ width:100%; height:100%; object-fit:cover; display:block; transition:transform .8s ease; filter:saturate(1.05) contrast(1.02); }
+.frame:hover .frame-inner img{ transform:scale(1.12); }
+.frame-glow{ position:absolute; inset:-2px; box-shadow:0 0 0 rgba(212,175,55,0); transition:box-shadow .5s ease; pointer-events:none;}
+.frame:hover .frame-glow{ box-shadow:0 0 40px rgba(212,175,55,0.5); }
+
+/* ============================= PROPOSAL ============================= */
+#crystal-canvas{ width:100%; height:100%; }
+
+/* ============================= MISC ============================= */
+.reveal{ opacity:0; transform:translateY(50px); }
+.fade-in{ animation:fadeIn 1.4s ease forwards; }
+@keyframes fadeIn{ to{ opacity:1; transform:none; } }
+
+.shooting-star{
+  position:absolute; width:2px; height:2px; background:#fff; border-radius:50%;
+  box-shadow:0 0 6px 2px rgba(255,255,255,0.8);
+}
+
+input[type=range]{ -webkit-appearance:none; appearance:none; height:2px; background:rgba(212,175,55,0.3); }
+input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:10px; height:10px; border-radius:50%; background:var(--champagne-gold); cursor:pointer; }
+
+@media (max-width:768px){
+  .section{ padding:5rem 1.2rem; }
+  .envelope-scene{ width:280px; height:190px; }
+  .timeline-line{ left:24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================= -->
+<!-- LOADING SCREEN -->
+<!-- ============================================================= -->
+<div id="loader">
+  <div class="loader-rose">
+    <svg viewBox="0 0 100 100" width="90" height="90">
+      <g id="loader-rose-svg" transform="translate(50,55)">
+        <!-- petals will be scaled in via JS/CSS for bloom -->
+        <ellipse class="lp" cx="0" cy="-4" rx="2" ry="3" fill="#8B0000"/>
+      </g>
+    </svg>
+  </div>
+  <div class="loader-text">Loading Our Love Story</div>
+  <div class="loader-bar-track"><div class="loader-bar-fill" id="loader-bar"></div></div>
+</div>
+
+<!-- Background canvases (global, always present) -->
+<canvas id="stars-canvas"></canvas>
+<canvas id="petals-canvas"></canvas>
+<canvas id="sparkle-canvas"></canvas>
+
+<!-- ============================================================= -->
+<!-- NAV -->
+<!-- ============================================================= -->
+<nav id="nav">
+  <div class="font-display text-sm tracking-[0.2em]" style="color:var(--champagne-gold)">Y <span style="color:var(--deep-red)">❤</span> K</div>
+  <button id="music-toggle" aria-label="Toggle music">
+    <svg id="music-icon-play" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7L8 5z" fill="#D4AF37"/></svg>
+    <svg id="music-icon-pause" width="18" height="18" viewBox="0 0 24 24" fill="none" style="display:none"><rect x="6" y="5" width="4" height="14" fill="#D4AF37"/><rect x="14" y="5" width="4" height="14" fill="#D4AF37"/></svg>
+  </button>
+</nav>
+
+<!-- Romantic piano music (royalty free placeholder via generated tone using Web Audio fallback handled in JS) -->
+<audio id="bg-music" loop preload="auto">
+  <source src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_1d4c0a39f6.mp3" type="audio/mpeg">
+</audio>
+
+<!-- ============================================================= -->
+<!-- OPENING SCENE -->
+<!-- ============================================================= -->
+<section id="opening">
+  <div class="moonlight"></div>
+  <div class="light-rays"></div>
+  <div id="opening-rose-3d" style="width:220px;height:220px;"></div>
+
+  <p class="opening-line font-display text-2xl md:text-4xl mt-6 px-6" style="color:var(--pearl); max-width:800px;" id="line1">
+    Every Love Story Is Beautiful...
+  </p>
+  <p class="opening-line font-display italic text-2xl md:text-4xl px-6 gold-text" id="line2">
+    But Ours Is My Favorite.
+  </p>
+
+  <div class="opening-line mt-10" id="names-reveal">
+    <h1 class="font-display text-4xl md:text-7xl tracking-wide">
+      <span class="rose-text">Yasar</span>
+      <span class="heartbeat inline-block mx-3" style="color:var(--deep-red)">❤</span>
+      <span class="gold-text">Khushi</span>
+    </h1>
+  </div>
+
+  <div class="opening-line mt-14 animate-bounce" id="scroll-hint" style="color:var(--champagne-gold);">
+    <div class="text-xs tracking-[0.3em] uppercase mb-2">Scroll to Begin</div>
+    <div class="text-xl">↓</div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- HERO SECTION -->
+<!-- ============================================================= -->
+<section id="hero" class="section">
+  <div class="bg-layer" style="background:radial-gradient(ellipse at 50% 30%, #2a0a0d 0%, #0a0306 70%);"></div>
+  <div class="smoke"></div>
+  <div class="light-rays"></div>
+  <div id="hero-bouquet" class="absolute inset-0 flex items-center justify-center opacity-90 pointer-events-none"></div>
+
+  <div class="relative z-10 text-center max-w-4xl reveal" data-anim="hero-text">
+    <p class="eyebrow mb-4">Royal Love · Luxury Romance · Forever Together</p>
+    <h1 class="font-display text-3xl md:text-6xl leading-tight">
+      <span class="gold-text">Khushi</span> <span class="heartbeat inline-block" style="color:var(--deep-red)">❤</span>
+      <br class="md:hidden">
+      <span class="block mt-2 text-2xl md:text-5xl" style="color:var(--pearl)">You Are The Best Thing<br>That Ever Happened To Me.</span>
+    </h1>
+    <div class="divider-orn"></div>
+    <p class="font-display italic text-lg md:text-2xl" style="color:var(--rose-gold-light)">
+      In Your Smile I Found My Happiness.<br>In Your Heart I Found My Home.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- LOVE STORY JOURNEY (TIMELINE) -->
+<!-- ============================================================= -->
+<section id="journey" class="section flex-col">
+  <div class="bg-layer" style="background:linear-gradient(180deg,#0a0306,#1a0a0d 50%,#0a0306);"></div>
+  <div class="relative z-10 text-center mb-16">
+    <p class="eyebrow">Our Story</p>
+    <h2 class="font-display text-3xl md:text-5xl gold-text mt-2">The Journey of Us</h2>
+    <div class="divider-orn"></div>
+  </div>
+
+  <div class="relative w-full max-w-4xl mx-auto">
+    <div class="timeline-line"></div>
+    <div id="timeline-items" class="relative z-10 flex flex-col gap-16 md:gap-24"></div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- LUXURY LOVE LETTER -->
+<!-- ============================================================= -->
+<section id="letter" class="section flex-col">
+  <div class="bg-layer" style="background:radial-gradient(ellipse at 50% 50%, #1a0a0d 0%, #0a0306 80%);"></div>
+  <div class="relative z-10 text-center mb-12">
+    <p class="eyebrow">For Your Eyes Only</p>
+    <h2 class="font-display text-3xl md:text-5xl gold-text mt-2">A Letter From My Heart</h2>
+    <div class="divider-orn"></div>
+    <p class="text-sm md:text-base" style="color:var(--rose-gold-light)">Click the seal to open</p>
+  </div>
+
+  <div class="envelope-scene" id="envelope" role="button" tabindex="0" aria-label="Open love letter">
+    <div class="envelope-back"></div>
+    <div class="envelope-letter">
+      <p class="letter-paper-text">
+        My dearest Khushi,<br><br>
+        From the moment you smiled at me, my whole world rearranged itself around you.
+        Every quiet morning, every late night, every ordinary Tuesday became extraordinary
+        simply because you were in it. You are my favorite hello and my hardest goodbye.
+        I love you more than yesterday, and not nearly as much as I will tomorrow.<br><br>
+        Forever yours,<br>Yasar
+      </p>
+    </div>
+    <div class="envelope-front-l"></div>
+    <div class="envelope-front-r"></div>
+    <div class="envelope-flap"></div>
+    <div class="envelope-seal">YK</div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- 100 REASONS I LOVE YOU -->
+<!-- ============================================================= -->
+<section id="reasons" class="section flex-col">
+  <div class="bg-layer" style="background:linear-gradient(180deg,#0a0306,#180609);"></div>
+  <div class="relative z-10 text-center mb-12 max-w-2xl">
+    <p class="eyebrow">A Hundred & Counting</p>
+    <h2 class="font-display text-3xl md:text-5xl gold-text mt-2">100 Reasons I Love You</h2>
+    <div class="divider-orn"></div>
+    <p class="text-sm" style="color:var(--rose-gold-light)">Hover or tap each card to reveal a reason.</p>
+  </div>
+  <div id="reasons-grid" class="relative z-10 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-6xl w-full"></div>
+</section>
+
+<!-- ============================================================= -->
+<!-- GALLERY -->
+<!-- ============================================================= -->
+<section id="gallery" class="section flex-col">
+  <div class="bg-layer" style="background:radial-gradient(ellipse at 50% 0%, #2a0a0d 0%, #0a0306 70%);"></div>
+  <div class="relative z-10 text-center mb-14">
+    <p class="eyebrow">Our Memories</p>
+    <h2 class="font-display text-3xl md:text-5xl gold-text mt-2">Moments We Treasure</h2>
+    <div class="divider-orn"></div>
+  </div>
+  <div id="gallery-grid" class="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl w-full"></div>
+</section>
+
+<!-- ============================================================= -->
+<!-- PROPOSAL SECTION -->
+<!-- ============================================================= -->
+<section id="proposal" class="section flex-col" style="min-height:130vh;">
+  <div class="bg-layer" style="background:radial-gradient(ellipse at 50% 40%, #2a0a0d 0%, #000 80%);"></div>
+  <div id="crystal-heart-wrap" class="absolute inset-0 z-0"></div>
+
+  <div class="relative z-10 text-center max-w-3xl">
+    <h2 class="font-display text-2xl md:text-4xl leading-relaxed">
+      <span class="gold-text">Khushi</span> <span style="color:var(--deep-red)">❤</span><br>
+      If I Had To Choose Again,<br>
+      I Would Still Choose You.<br>
+      <span class="rose-text italic">Today. Tomorrow. Forever.</span>
+    </h2>
+    <div class="mt-10">
+      <button id="forever-btn" class="btn-luxury">Forever Yours <span class="heartbeat inline-block">❤</span></button>
+    </div>
+  </div>
+</section>
+
+<!-- Fullscreen celebration overlay -->
+<div id="celebration" class="fixed inset-0 z-[999] pointer-events-none opacity-0" style="background:radial-gradient(circle, rgba(139,0,0,0.3), rgba(0,0,0,0.85));">
+  <canvas id="celebration-canvas" class="absolute inset-0 w-full h-full"></canvas>
+  <div class="absolute inset-0 flex items-center justify-center">
+    <h2 id="celebration-names" class="font-display text-4xl md:text-7xl text-center opacity-0">
+      <span class="rose-text">Yasar</span> <span class="heartbeat inline-block" style="color:var(--deep-red)">❤</span> <span class="gold-text">Khushi</span>
+    </h2>
+  </div>
+</div>
+
+<!-- ============================================================= -->
+<!-- FINAL ENDING SCENE -->
+<!-- ============================================================= -->
+<section id="ending" class="section flex-col" style="background:#000;">
+  <canvas id="ending-stars-canvas" class="absolute inset-0 w-full h-full"></canvas>
+  <div class="relative z-10 text-center">
+    <div id="ending-heart" class="mx-auto mb-6" style="width:280px; height:240px;"></div>
+    <h2 class="font-display text-2xl md:text-4xl gold-text mb-3 opacity-0" id="ending-names">
+      Yasar ❤ Khushi
+    </h2>
+    <p class="font-script text-5xl md:text-7xl opacity-0" id="ending-tagline" style="color:var(--champagne);">
+      Together Forever
+    </p>
+  </div>
+</section>
+
+<footer class="text-center py-10 text-xs tracking-[0.3em] uppercase" style="color:rgba(212,175,55,0.5); background:#000;">
+  Made with infinite love — Yasar &amp; Khushi
+</footer>
+
+<script src="app.js" defer></script>
+</body>
+</html>
